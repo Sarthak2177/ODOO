@@ -284,12 +284,7 @@ const Login = ({ onLogin }: LoginProps) => {
 
           {/* Stats */}
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:28 }}>
-            {[["₹2.4Cr","Processed"],["98%","Accuracy"],["3x","Faster"]].map(([v,l]) => (
-              <div key={l} style={{ textAlign:"center", padding:"14px 8px", background:"rgba(255,255,255,0.04)", borderRadius:14, border:"1px solid rgba(255,255,255,0.07)" }}>
-                <div style={{ fontSize:20, fontWeight:800, color:"#00c896", fontFamily:"'Syne',sans-serif" }}>{v}</div>
-                <div style={{ fontSize:10, color:"rgba(255,255,255,0.38)", marginTop:2, letterSpacing:0.5 }}>{l}</div>
-              </div>
-            ))}
+            
           </div>
 
           <p style={{ fontSize:11, fontWeight:700, letterSpacing:0.8, color:"rgba(255,255,255,0.38)", textTransform:"uppercase", marginBottom:12 }}>Continue as</p>
