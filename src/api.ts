@@ -71,7 +71,6 @@ export const createUser = async (data: {
   password: string;
   role: string;
   department: string;
-  empId?: string;
 }) => {
   const res = await fetch(`${BASE_URL}/users`, {
     method: "POST",
