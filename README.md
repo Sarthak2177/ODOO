@@ -1,80 +1,87 @@
-Gemini said
-ReimburseAI - Intelligent Expense Management
-ReimburseAI is a high-performance reimbursement management system built for hackathons. It features a polished glassmorphism UI, real-time backend integration, and intelligent automation including AI-driven fraud detection and OCR receipt scanning.
+# ReimburseAI - Intelligent Expense Management
 
-🔐 Default Account Credentials
-For demonstration purposes, the system is seeded with default accounts representing different organizational roles.
+**ReimburseAI** is a high-performance reimbursement management system featuring a polished glassmorphism UI, real-time backend integration, and intelligent automation including AI-driven fraud detection and OCR receipt scanning.
 
-🛡️ Administrator
-Email: anita@company.com
+---
 
-Password: password123
+## 🔐 Default Account Credentials
 
-Permissions: Full system control, user role management, and admin override for expense approvals.
+The following accounts are pre-configured for different organizational roles within the system.
 
-💼 Manager
-Email: sneha@company.com
+### **🛡️ Administrator**
+* **Email:** `anita@company.com`
+* **Password:** `password123`
+* **Permissions:** Full system control, user role management, and admin override for expense approvals.
 
-Password: password123
+### **💼 Manager**
+* **Email:** `sneha@company.com`
+* **Password:** `password123`
+* **Permissions:** Review team expenses, approve valid claims, or reject with comments.
 
-Permissions: Review team expenses, approve valid claims, or reject with comments.
+### **🧑‍💻 Employee**
+* **Email:** `arjun@company.com`
+* **Password:** `password123`
+* **Permissions:** Submit expenses, upload receipts for AI OCR scanning, and track reimbursement status.
 
-🧑‍💻 Employee
-Email: arjun@company.com
+---
 
-Password: password123
+## 🛠️ Tech Stack
 
-Permissions: Submit expenses, upload receipts for AI OCR scanning, and track reimbursement status.
+* **Frontend:** React, TypeScript, Vite, Tailwind CSS, Framer Motion.
+* **Backend:** FastAPI (Python).
+* **Database:** MongoDB Atlas.
+* **Authentication:** JWT (JSON Web Tokens).
 
-🛠️ Tech Stack
-Frontend: React, TypeScript, Vite, Tailwind CSS, Framer Motion.
+---
 
-Backend: FastAPI (Python).
+## 🚀 Getting Started
 
-Database: MongoDB Atlas.
-
-Authentication: JWT (JSON Web Tokens).
-
-🚀 Getting Started
-1. Backend Setup
-Navigate to the backend directory and install dependencies:
-
-Bash
+### **1. Backend Setup**
+Navigate to the `backend` directory and install dependencies:
+```bash
 cd backend
 pip install fastapi uvicorn pymongo python-dotenv python-jose python-multipart
-Create a .env file in the backend folder:
-
-Code snippet
+```
+Create a `.env` file in the `backend` folder:
+```env
 MONGO_URI="your_mongodb_atlas_connection_string"
+```
 Start the server:
-
-Bash
+```bash
 uvicorn main:app --reload
-2. Frontend Setup
+```
+
+### **2. Frontend Setup**
 Navigate to the root directory and install dependencies:
-
-Bash
+```bash
 npm install
+```
 Start the development server:
-
-Bash
+```bash
 npm run dev
-🌟 Key Features
-Smart OCR Scanning: Automatically extracts amount, date, and vendor from uploaded receipts.
+```
 
-AI Fraud Detection: Rule-based engine that flags high-risk submissions based on patterns and policy limits.
+---
 
-Multi-Stage Approval: Seamless flow from submitted → manager_approved → finance_approved → approved.
+## 🌟 Key Features
 
-Admin Override: Allows administrators to bypass standard approval chains for urgent claims.
+* **Smart OCR Scanning:** Automatically extracts amount, date, and vendor from uploaded receipts.
+* **AI Fraud Detection:** Rule-based engine that flags high-risk submissions based on patterns and policy limits.
+* **Multi-Stage Approval:** Seamless flow from `submitted` → `manager_approved` → `finance_approved` → `approved`.
+* **Admin Override:** Allows administrators to bypass standard approval chains to fully approve claims instantly.
+* **Interactive Analytics:** Real-time charts and metrics for company-wide spending insights with clickable metric cards for deep-dive filtering.
 
-Interactive Analytics: Real-time charts and metrics for company-wide spending insights.
+---
 
-📁 Project Structure
-Plaintext
+## 📁 Project Structure
+```text
 /backend          # FastAPI server, JWT Auth, MongoDB logic
 /src              # React Frontend
-  /api            # Axios/Fetch API configurations
+  /api            # Fetch API configurations
   /components     # Reusable UI components (GlassCard, badges, etc.)
   /pages          # Role-based Dashboards and Login flow
-Built for the 2026 Odoo Hackathon.
+```
+
+---
+
+*Built for the 2026 Odoo Hackathon.*
