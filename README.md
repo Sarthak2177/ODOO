@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# Welcome to Our Odoo Hackathonproject
 
 TODO: Document your project here
