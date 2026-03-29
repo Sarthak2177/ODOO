@@ -180,7 +180,7 @@ const Login = ({ onLogin }: LoginProps) => {
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   
   const [form, setForm] = useState({ firstName:"", lastName:"", empId:"", email:"", password:"", confirm:"" });
-  const [loginForm, setLoginForm] = useState({ empId:"", email:"", password:"" });
+  const [loginForm, setLoginForm] = useState({ email:"", password:"" }); // FIXED: Removed empId requirement
 
   /* Auto-detect country from browser locale */
   useEffect(() => {
@@ -205,8 +205,7 @@ const Login = ({ onLogin }: LoginProps) => {
   /* ─── REAL BACKEND API LOGIN FUNCTION ─── */
   const doLogin = async () => {
     setError("");
-    if (!loginForm.email || !loginForm.password) { setError("Please enter email and password."); return; }
-    if (loginRole !== "admin" && !loginForm.empId) { setError("Employee ID is required."); return; }
+    if (!loginForm.email || !loginForm.password) { setError("Please enter email and password."); return; } // FIXED: Removed empId validation
     
     setLoading(true);
     try {
@@ -348,7 +347,6 @@ const Login = ({ onLogin }: LoginProps) => {
           <motion.div key="login" style={{...CARD, maxWidth:460, position:"relative", zIndex:10}} variants={cardVariants} initial="hidden" animate="visible" exit="exit">
             <div style={{ height:4, background:`linear-gradient(90deg,${cfg.color},${cfg.color}77)` }} />
             <div style={{ padding:"28px 32px 32px" }}>
-              {/* Back + badge */}
               <div style={{ display:"flex", alignItems:"center", marginBottom:22 }}>
                 <motion.button whileHover={{ x:-3 }} onClick={() => setView("landing")}
                   style={{ display:"flex", alignItems:"center", gap:4, fontSize:12, color:"rgba(255,255,255,0.38)", background:"none", border:"none", cursor:"pointer", padding:0 }}>
@@ -371,7 +369,6 @@ const Login = ({ onLogin }: LoginProps) => {
                 </motion.div>
               )}
 
-              {/* Role switcher */}
               <p style={{ fontSize:11, fontWeight:700, letterSpacing:0.6, color:"rgba(255,255,255,0.38)", textTransform:"uppercase", marginBottom:10 }}>Sign in as</p>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:8, marginBottom:20 }}>
                 {(["employee","manager","finance","director","admin"] as Role[]).map(r => {
@@ -388,9 +385,6 @@ const Login = ({ onLogin }: LoginProps) => {
                 })}
               </div>
 
-              {loginRole !== "admin" && (
-                <Field label="Employee ID" value={loginForm.empId} onChange={setLF("empId")} placeholder="EMP-0042" icon={Shield} />
-              )}
               <Field label="Work Email" type="email" value={loginForm.email} onChange={setLF("email")} placeholder="you@company.com" icon={Globe} />
               <Field label="Password" type={showPw?"text":"password"} value={loginForm.password} onChange={setLF("password")} placeholder="••••••••" icon={Shield}
                 rightEl={<button onClick={() => setShowPw(v=>!v)} style={{ color:"rgba(255,255,255,0.38)", background:"none", border:"none", cursor:"pointer", display:"flex" }}>{showPw?<EyeOff size={15}/>:<Eye size={15}/>}</button>}
@@ -434,7 +428,6 @@ const Login = ({ onLogin }: LoginProps) => {
               <h2 style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800, color:"#fff", marginBottom:4 }}>Create Account</h2>
               <p style={{ fontSize:13, color:"rgba(255,255,255,0.38)", marginBottom:20 }}>Join your company's expense platform</p>
 
-              {/* Role picker */}
               <p style={{ fontSize:11, fontWeight:700, letterSpacing:0.6, color:"rgba(255,255,255,0.38)", textTransform:"uppercase", marginBottom:10 }}>I am signing up as</p>
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:14 }}>
                 {(["employee","manager","finance","director"] as Role[]).map(r => {
@@ -456,7 +449,6 @@ const Login = ({ onLogin }: LoginProps) => {
                 })}
               </div>
 
-              {/* Admin approval note — ALL roles */}
               <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}
                 style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"12px 14px", background:"rgba(0,200,150,0.08)", border:"1px solid rgba(0,200,150,0.2)", borderRadius:12, marginBottom:16, fontSize:12.5, color:"rgba(0,200,150,0.9)", lineHeight:1.5 }}>
                 <Info size={15} style={{ flexShrink:0, marginTop:1 }} />
@@ -478,13 +470,11 @@ const Login = ({ onLogin }: LoginProps) => {
               <Field label="Employee ID / Number" value={form.empId} onChange={setF("empId")} placeholder="EMP-0042" icon={Shield} />
               <Field label="Work Email" type="email" value={form.email} onChange={setF("email")} placeholder="riya@company.com" icon={Globe} />
 
-              {/* Country / Currency dropdown */}
               <div style={{ marginBottom:14 }}>
                 <label style={{ display:"block", fontSize:11, fontWeight:700, letterSpacing:"0.6px", color:"rgba(255,255,255,0.45)", textTransform:"uppercase", marginBottom:6 }}>
                   Country <span style={{ color:"#00c896", fontWeight:600, textTransform:"none", letterSpacing:0, fontSize:11 }}>→ sets company currency</span>
                 </label>
 
-                {/* Selected country currency pill — always visible when selected */}
                 {selectedCountry && (
                   <motion.div initial={{ opacity:0, y:-6 }} animate={{ opacity:1, y:0 }}
                     style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", background:"rgba(0,200,150,0.1)", border:"1px solid rgba(0,200,150,0.3)", borderRadius:12, marginBottom:8 }}>
@@ -607,7 +597,6 @@ const Login = ({ onLogin }: LoginProps) => {
       <motion.div style={{...CARD, maxWidth:520, position:"relative", zIndex:10}} variants={cardVariants} initial="hidden" animate="visible">
         <div style={{ height:4, background:"linear-gradient(90deg,#10b981,#10b98177)" }} />
         <div style={{ padding:"28px 28px 32px" }}>
-          {/* Header */}
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>
             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
               <Shield size={18} color="#10b981" />
@@ -662,7 +651,6 @@ const Login = ({ onLogin }: LoginProps) => {
                     </div>
                   </div>
 
-                  {/* Country + currency badge */}
                   <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10, padding:"7px 12px", background:"rgba(0,200,150,0.07)", borderRadius:10, border:"1px solid rgba(0,200,150,0.15)" }}>
                     <Globe size={12} color="#00c896" />
                     <span style={{ fontSize:11, color:"rgba(255,255,255,0.45)", flex:1 }}>{u.country}</span>

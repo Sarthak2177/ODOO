@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Shield, Settings, DollarSign, CheckCircle, Clock, ShieldAlert, X, UserPlus } from "lucide-react";
+import { Users, Shield, Settings, DollarSign, CheckCircle, Clock, ShieldAlert, X, UserPlus, Search, Filter } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { ApprovalFlowLabeled } from "@/components/ApprovalFlow";
 import AuditTrail from "@/components/AuditTrail";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import FraudCard from "@/components/FraudCard";
-import { fetchExpenses, approveExpense, fetchUsers, updateUserRole } from "@/api"; // API Imports
+import { fetchExpenses, approveExpense, fetchUsers, updateUserRole, createUser } from "@/api"; // API Imports
 import { chartData, CATEGORIES, type Expense } from "@/data/mockData";
 import { toast } from "sonner";
 
@@ -31,9 +31,10 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
 
 interface UserEntry {
   id: string;
+  empId: string; // FIXED: Added Employee ID
   name: string;
   email: string;
-  role: "employee" | "manager" | "admin";
+  role: "employee" | "manager" | "admin" | "finance" | "director";
   department: string;
 }
 
@@ -41,6 +42,8 @@ const roleBadge: Record<string, string> = {
   employee: "bg-blue-50 text-blue-700 border-blue-200",
   manager: "bg-amber-50 text-amber-700 border-amber-200",
   admin: "bg-violet-50 text-violet-700 border-violet-200",
+  finance: "bg-cyan-50 text-cyan-700 border-cyan-200",
+  director: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
 const AdminDashboard = ({ onLogout }: Props) => {
@@ -50,7 +53,10 @@ const AdminDashboard = ({ onLogout }: Props) => {
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [riskFilter, setRiskFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // FIXED: Added missing state
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "employee", department: "" });
+  const [addUserLoading, setAddUserLoading] = useState(false);
 
   // FETCH ALL REAL DATA ON MOUNT
   useEffect(() => {
@@ -119,7 +125,7 @@ const AdminDashboard = ({ onLogout }: Props) => {
   const handleRoleChange = async (userId: string, newRole: string, userName: string) => {
     try {
       await updateUserRole(userId, newRole);
-      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole as UserEntry["role"] } : u));
+      setUsers(users.map(u => u.id === userId ? { ...u, role: newRole as any } : u));
       toast.success(`${userName}'s role updated to ${newRole}`);
     } catch (error) {
       toast.error(`Failed to update role for ${userName}`);
@@ -133,6 +139,26 @@ const AdminDashboard = ({ onLogout }: Props) => {
     { name: "Finance", amount: 15000 },
     { name: "Operations", amount: 28000 },
   ];
+
+  const handleAddUser = async () => {
+    if (!newUser.name || !newUser.email || !newUser.password) {
+      toast.error("Name, email and password are required.");
+      return;
+    }
+    setAddUserLoading(true);
+    try {
+      await createUser(newUser);
+      const usersData = await fetchUsers();
+      if (Array.isArray(usersData)) setUsers(usersData);
+      setShowAddUser(false);
+      setNewUser({ name: "", email: "", password: "", role: "employee", department: "" });
+      toast.success(`User ${newUser.name} added successfully!`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to add user.");
+    } finally {
+      setAddUserLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -240,15 +266,16 @@ const AdminDashboard = ({ onLogout }: Props) => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">Manage Users</h2>
-              <Button size="sm" className="gap-1.5" onClick={() => toast.info("User invite modal would open here")}>
+              <Button size="sm" className="gap-1.5" onClick={() => setShowAddUser(true)}>
                 <UserPlus className="w-4 h-4" /> Add User
               </Button>
             </div>
-            <GlassCard hover={false} className="overflow-hidden p-0">
+            <GlassCard hover={false} className="p-0 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border text-left text-muted-foreground bg-muted/50">
+                      <th className="px-4 py-3 font-medium">Emp ID</th>
                       <th className="px-4 py-3 font-medium">Name</th>
                       <th className="px-4 py-3 font-medium">Email</th>
                       <th className="px-4 py-3 font-medium">Role</th>
@@ -260,6 +287,7 @@ const AdminDashboard = ({ onLogout }: Props) => {
                     {users.map((u, i) => (
                       <motion.tr key={u.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }}
                         className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-3 font-mono text-primary text-xs font-semibold">{u.empId || "N/A"}</td>
                         <td className="px-4 py-3 text-foreground font-medium">{u.name}</td>
                         <td className="px-4 py-3 text-muted-foreground text-xs">{u.email}</td>
                         <td className="px-4 py-3">
@@ -269,7 +297,6 @@ const AdminDashboard = ({ onLogout }: Props) => {
                         </td>
                         <td className="px-4 py-3 text-muted-foreground text-xs">{u.department}</td>
                         <td className="px-4 py-3 flex gap-1">
-                          {/* REAL DATABASE ROLE UPDATE */}
                           <Select defaultValue={u.role} onValueChange={(val) => handleRoleChange(u.id, val, u.name)}>
                             <SelectTrigger className="h-7 text-xs w-28 bg-background"><SelectValue /></SelectTrigger>
                             <SelectContent>
@@ -282,7 +309,7 @@ const AdminDashboard = ({ onLogout }: Props) => {
                       </motion.tr>
                     ))}
                     {users.length === 0 && (
-                      <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No users found.</td></tr>
+                      <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No users found.</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -294,32 +321,26 @@ const AdminDashboard = ({ onLogout }: Props) => {
         {/* All Expenses */}
         {activeTab === "expenses" && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-            <h2 className="text-lg font-semibold text-foreground">All Expenses (Admin View)</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-              <Input placeholder="Search ID or Employee..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="bg-background text-sm" />
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="bg-background text-sm"><SelectValue placeholder="Status" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">All Pending</SelectItem>
-                  <SelectItem value="submitted">Just Submitted</SelectItem>
-                  <SelectItem value="manager_approved">Manager ✓</SelectItem>
-                  <SelectItem value="finance_approved">Finance ✓</SelectItem>
-                  <SelectItem value="approved">Fully Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={riskFilter} onValueChange={setRiskFilter}>
-                <SelectTrigger className="bg-background text-sm"><SelectValue placeholder="Risk Level" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Risk</SelectItem>
-                  <SelectItem value="low">Low Risk</SelectItem>
-                  <SelectItem value="medium">Medium Risk</SelectItem>
-                  <SelectItem value="high">High Risk</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-foreground">All Expenses (Admin View)</h2>
+                <div className="flex gap-2">
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                        <Input placeholder="Search..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-8 h-9 w-48 text-xs bg-background" />
+                    </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="h-9 w-32 text-xs bg-background"><Filter className="w-3 h-3 mr-2" /><SelectValue placeholder="Status" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="approved">Approved</SelectItem>
+                            <SelectItem value="rejected">Rejected</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
-            <GlassCard hover={false} className="overflow-hidden p-0">
+            
+            <GlassCard hover={false} className="p-0 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -447,6 +468,39 @@ const AdminDashboard = ({ onLogout }: Props) => {
               <div>
                 <h4 className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Audit Trail</h4>
                 <AuditTrail entries={selectedExpense.auditTrail || []} />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Add User Modal */}
+      <AnimatePresence>
+        {showAddUser && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm p-4"
+            onClick={() => setShowAddUser(false)}>
+            <motion.div
+              initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              className="bg-card rounded-2xl border border-border p-6 max-w-md w-full space-y-4 shadow-2xl"
+              onClick={e => e.stopPropagation()}>
+              <h3 className="text-lg font-bold">New User Account</h3>
+              <div className="space-y-3">
+                <Input placeholder="Full Name" value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})} />
+                <Input placeholder="Work Email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} />
+                <Input placeholder="Password" type="password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} />
+                <Select value={newUser.role} onValueChange={v => setNewUser({...newUser, role: v as any})}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="employee">Employee</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowAddUser(false)}>Cancel</Button>
+                  <Button className="flex-1" onClick={handleAddUser} disabled={addUserLoading}>Provision Account</Button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
